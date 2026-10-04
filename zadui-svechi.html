@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Задуй свечи</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: full-screen candlelit stage, cake bottom-center, words float above it */
+:root{
+  --night:#0e0b1f; --night-2:#21143f;
+  --ink:#f8efe4; --ink-dim:rgba(248,239,228,.66);
+  --flame:#ffb347; --rose:#ff5d8f; --mint:#5fe0c3; --butter:#ffd65a; --violet:#a98bff;
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:hidden;
+  -webkit-user-select:none;user-select:none;touch-action:none;-webkit-tap-highlight-color:transparent}
+#stage{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:pointer}
+[hidden]{display:none!important}
+
+.hud{position:fixed;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + clamp(20px,5vh,48px)) 16px 0;
+  text-align:center;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:.5rem}
+.hud h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,5.6vw,60px);line-height:1.08;margin:0;
+  letter-spacing:-.01em;text-wrap:balance;max-width:16ch}
+.hud p{margin:0;font-size:clamp(15px,2.2vw,20px);color:var(--ink-dim);text-wrap:balance}
+
+.blow{font-family:var(--display);font-weight:800;font-size:clamp(34px,8vw,84px);color:var(--flame);margin-top:.2em;
+  text-shadow:0 0 24px rgba(255,160,60,.55);animation:breathe 1.4s ease-in-out infinite}
+.blow.hard{color:var(--butter);animation-duration:.35s}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.12);opacity:1}}
+
+#final h1{max-width:14ch}
+#final h1 .w{display:inline-block;white-space:nowrap}
+#final h1 .l{display:inline-block;animation:drop .8s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes drop{0%{transform:translateY(-60px) scale(.4) rotate(-12deg);opacity:0}100%{transform:none;opacity:1}}
+#final p{animation:fade 1s 1.2s both}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.btn{pointer-events:auto;font:700 16px/1 var(--body);color:var(--night);background:var(--butter);border:0;border-radius:999px;
+  padding:16px 26px;cursor:pointer;box-shadow:0 8px 30px rgba(255,200,80,.25);transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn:focus-visible,.link:focus-visible,.chip:focus-visible,input:focus-visible{outline:3px solid var(--mint);outline-offset:3px}
+.link{pointer-events:auto;background:none;border:0;color:var(--ink-dim);font:600 14px var(--body);text-decoration:underline;
+  text-underline-offset:3px;cursor:pointer;padding:8px}
+#again{margin-top:1rem;animation:fade .8s 2.4s both}
+
+/* start screen */
+#start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;
+  padding:24px 16px;text-align:center;background:radial-gradient(ellipse at 50% 60%,rgba(14,11,31,.35),rgba(14,11,31,.88) 70%)}
+#start h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,6vw,62px);line-height:1.08;margin:0;max-width:14ch;text-wrap:balance}
+#start p{margin:0;color:var(--ink-dim);max-width:34ch;font-size:16px;line-height:1.5}
+
+/* footer controls */
+.foot{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));
+  display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 18px;font-size:13px;color:var(--ink-dim)}
+.meter{display:flex;align-items:center;gap:8px}
+.bar{position:relative;width:120px;height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--mint),var(--butter),var(--rose));border-radius:99px}
+.bar b{position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:var(--ink)}
+.chip{pointer-events:auto;background:rgba(255,255,255,.08);color:var(--ink);border:1px solid rgba(255,255,255,.14);
+  border-radius:99px;padding:7px 12px;font:600 13px var(--body);cursor:pointer}
+label.sens{display:flex;align-items:center;gap:8px}
+input[type=range]{width:90px;accent-color:var(--flame)}
+.note{width:100%;text-align:center}
+@media (max-width:480px){.hint-key{display:none}}
+@media (prefers-reduced-motion:reduce){.blow,#final h1 .l,#final p,#again{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="stage" aria-label="Торт со свечами"></canvas>
+
+<div class="hud" id="intro">
+  <h1>Задуй свечи</h1>
+  <p>и загадай желание</p>
+  <div class="blow" id="blowLabel" hidden>Дуй!</div>
+</div>
+
+<div class="hud" id="final" hidden>
+  <h1 id="finalTitle"></h1>
+  <p>Желание загадано. Пусть сбудется!</p>
+  <button class="btn" id="again" type="button">Зажечь свечи ещё раз</button>
+</div>
+
+<div id="start">
+  <h1>Задуй свечи и загадай желание</h1>
+  <p>Странице нужен микрофон: она слышит, когда ты дуешь, и свечи гаснут одна за другой.</p>
+  <button class="btn" id="go" type="button">Включить микрофон</button>
+  <button class="link" id="nomic" type="button">Без микрофона</button>
+</div>
+
+<div class="foot" id="foot" hidden>
+  <div class="meter" title="Громкость с микрофона. Черта — порог задувания">
+    <span>Микрофон</span><div class="bar"><i id="lvl"></i><b></b></div>
+  </div>
+  <label class="sens">Чувствительность <input id="sens" type="range" min="1" max="10" value="6"></label>
+  <button class="chip" id="mute" type="button">Звук: вкл</button>
+  <div class="note" id="note"><span class="hint-key">Нет микрофона? Зажми пробел или </span>удерживай палец на торте</div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const params = new URLSearchParams(location.search);
+const N = Math.max(1, Math.min(30, parseInt(params.get('candles'), 10) || 7));
+const NAME = (params.get('name') || '').trim().slice(0, 40);
+const LOW = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const $ = id => document.getElementById(id);
+const cvs = $('stage'), ctx = cvs.getContext('2d');
+let W = 0, H = 0, DPR = 1, T = 0;
+const rnd = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+/* ---------- seeded decor (stable across resizes) ---------- */
+let seed = 7;
+const srnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const mkDrips = k => Array.from({length: k}, (_, i) => ({s: (i + 0.5) / k + (srnd() - .5) * .5 / k, L: .12 + srnd() * .32, w: .018 + srnd() * .018}));
+const DRIPS1 = mkDrips(13), DRIPS2 = mkDrips(10);
+const SPR_COL = ['#ffd65a', '#5fe0c3', '#a98bff', '#ffffff', '#ff9a3c', '#3fb8ff'];
+const SPRINKLES = Array.from({length: 46}, () => ({u: (srnd() * 2 - 1) * .9, v: .42 + srnd() * .45, a: srnd() * Math.PI, c: SPR_COL[(srnd() * SPR_COL.length) | 0]}));
+const BOKEH = Array.from({length: 16}, () => ({x: srnd(), y: srnd() * .7, r: 20 + srnd() * 60, h: [330, 45, 170, 260][(srnd() * 4) | 0], p: srnd() * 6}));
+const CANDLE_COL = [['#fff4e0', '#ff5d8f'], ['#eaf8ff', '#3fb8ff'], ['#fff9d6', '#ffb800'], ['#ecfff7', '#2fc79a'], ['#f6ecff', '#9b6bff']];
+
+/* ---------- state ---------- */
+let G = {};
+const candles = Array.from({length: N}, (_, i) => ({
+  i, alive: true, flame: 1, ember: 0, smokeT: 0, ph: Math.random() * 10, col: CANDLE_COL[i % CANDLE_COL.length], x: 0, y: 0
+}));
+let order = [];
+let state = 'idle';           // idle | play | dark | party
+let prog = 0, lastOut = 0, darkT = 0, partyT = 0, nextFw = 0, waves = [];
+let light = 1, roomLight = 0, flash = 0;
+const smoke = [], confetti = [], sparks = [], rockets = [];
+
+function shuffle() {
+  order = candles.map(c => c).sort(() => Math.random() - .5);
+}
+
+function layout() {
+  const w1 = Math.min(W * .8, H * .6, 560);
+  const cx = W / 2;
+  const baseY = H - Math.max(W < 560 ? 165 : 140, H * .2);
+  const h1 = w1 * .3, ry1 = w1 * .12;
+  const w2 = w1 * .74, h2 = w1 * .24, ry2 = w2 * .13;
+  const top1 = baseY - h1, top2 = top1 - h2;
+  const cw = clamp(w2 * .8 / N * .4, 6, 16);
+  const ch = Math.min(cw * 4.6, w1 * .2);
+  G = {w1, cx, baseY, h1, ry1, w2, h2, ry2, top1, top2, cw, ch};
+  const place = (list, rowOff, span) => list.forEach((c, k) => {
+    const n = list.length;
+    const u = n === 1 ? 0 : -span + 2 * span * k / (n - 1);
+    c.u = u;
+    c.x = cx + u * w2 / 2;
+    c.y = top2 + rowOff(k) * ry2 * Math.sqrt(1 - u * u);
+  });
+  if (N <= 8) place(candles, k => N === 1 ? 0 : (k % 2 ? .38 : -.32), .74);
+  else {
+    const back = candles.slice(0, Math.ceil(N / 2)), front = candles.slice(Math.ceil(N / 2));
+    place(back, () => -.5, .72); place(front, () => .5, .62);
+  }
+}
+
+function resize() {
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  W = innerWidth; H = innerHeight;
+  cvs.width = Math.round(W * DPR); cvs.height = Math.round(H * DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  layout();
+}
+addEventListener('resize', resize);
+
+/* ---------- audio: mic + synth ---------- */
+let ac = null, master = null, analyser = null, buf = null, micOK = false, muted = false;
+let rms = 0, floor = 0.01, sustain = 0, blowing = false, blowLevel = 0, holding = false;
+let noise = null, music = [];
+
+function ensureAudio() {
+  if (!ac) {
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    master = ac.createGain(); master.gain.value = 0.8; master.connect(ac.destination);
+    noise = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+    const d = noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  if (ac.state === 'suspended') ac.resume();
+}
+
+async function startMic() {
+  ensureAudio();
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('nomedia');
+  const stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: false, noiseSuppression: false, autoGainControl: false}});
+  const src = ac.createMediaStreamSource(stream);
+  analyser = ac.createAnalyser(); analyser.fftSize = 1024; analyser.smoothingTimeConstant = 0.2;
+  src.connect(analyser);
+  buf = new Float32Array(analyser.fftSize);
+  micOK = true;
+}
+
+function pop(when = 0, vol = .7) {
+  if (!ac) return;
+  const t = ac.currentTime + when;
+  const s = ac.createBufferSource(); s.buffer = noise;
+  const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = rnd(900, 1900); f.Q.value = .7;
+  const g = ac.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .004); g.gain.exponentialRampToValueAtTime(.001, t + .2);
+  s.connect(f).connect(g).connect(master); s.start(t, Math.random() * .5); s.stop(t + .25);
+  const o = ac.createOscillator(); o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(45, t + .14);
+  const og = ac.createGain(); og.gain.setValueAtTime(vol * .8, t); og.gain.exponentialRampToValueAtTime(.001, t + .16);
+  o.connect(og).connect(master); o.start(t); o.stop(t + .2);
+}
+function boom(vol = .28) {
+  if (!ac) return;
+  const t = ac.currentTime;
+  const s = ac.createBufferSource(); s.buffer = noise;
+  const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = rnd(300, 600);
+  const g = ac.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + .7);
+  s.connect(f).connect(g).connect(master); s.start(t, Math.random() * .2); s.stop(t + .8);
+}
+function puff() {
+  if (!ac) return;
+  const t = ac.currentTime;
+  const s = ac.createBufferSource(); s.buffer = noise;
+  const f = ac.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 2500;
+  const g = ac.createGain(); g.gain.setValueAtTime(.12, t); g.gain.exponentialRampToValueAtTime(.001, t + .25);
+  s.connect(f).connect(g).connect(master); s.start(t, Math.random() * .5); s.stop(t + .3);
+}
+function playMelody(delay) {
+  if (!ac) return;
+  const Nt = {G4: 392, A4: 440, B4: 493.88, C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99};
+  const song = [
+    ['G4', .75], ['G4', .25], ['A4', 1], ['G4', 1], ['C5', 1], ['B4', 2],
+    ['G4', .75], ['G4', .25], ['A4', 1], ['G4', 1], ['D5', 1], ['C5', 2],
+    ['G4', .75], ['G4', .25], ['G5', 1], ['E5', 1], ['C5', 1], ['B4', 1], ['A4', 2],
+    ['F5', .75], ['F5', .25], ['E5', 1], ['C5', 1], ['D5', 1], ['C5', 3]
+  ];
+  const beat = .42;
+  let t = ac.currentTime + delay;
+  for (const [n, b] of song) {
+    const d = b * beat;
+    [[1, 'triangle', .22], [2, 'sine', .06]].forEach(([mul, type, v]) => {
+      const o = ac.createOscillator(); o.type = type; o.frequency.value = Nt[n] * mul;
+      const g = ac.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .012);
+      g.gain.exponentialRampToValueAtTime(.001, t + d * .95 + .35);
+      o.connect(g).connect(master); o.start(t); o.stop(t + d + .4); music.push(o);
+    });
+    t += d;
+  }
+}
+function stopMusic() { music.forEach(o => { try { o.stop(); } catch (e) {} }); music = []; }
+
+/* ---------- blow detection ---------- */
+const sensEl = $('sens');
+function threshold() {
+  const s = +sensEl.value;                       // 1..10
+  const base = 0.018 + (10 - s) * 0.014;         // 6 -> ~0.074
+  return Math.max(base, floor * 3.5);
+}
+function listen(dt) {
+  let raw = false, str = 0;
+  const thr = threshold();
+  if (analyser) {
+    analyser.getFloatTimeDomainData(buf);
+    let s = 0; for (let i = 0; i < buf.length; i++) s += buf[i] * buf[i];
+    rms = Math.sqrt(s / buf.length);
+    raw = rms > thr;
+    str = clamp((rms - thr) / (thr * 1.5), 0, 1);
+    if (!raw) floor = clamp(floor + (rms - floor) * (rms < floor ? .2 : .01), .002, .05);
+  }
+  if (holding) { raw = true; str = Math.max(str, .7); }
+  sustain = raw ? sustain + dt : 0;
+  blowing = sustain > .07;
+  const target = blowing ? .25 + .75 * str : 0;
+  blowLevel += (target - blowLevel) * (target > blowLevel ? .45 : .1);
+  const shown = holding ? .8 : clamp(rms / (thr * 2), 0, 1);
+  $('lvl').style.width = (shown * 100).toFixed(1) + '%';
+}
+
+/* ---------- particles ---------- */
+const PARTY = ['#ff5d8f', '#ffd65a', '#5fe0c3', '#a98bff', '#3fb8ff', '#ff9a3c', '#ffffff'];
+function popper(fromLeft) {
+  const n = LOW ? 50 : 150, sc = Math.max(.7, H / 820);
+  const ox = fromLeft ? -10 : W + 10, oy = H + 10;
+  for (let i = 0; i < n; i++) {
+    const a = (fromLeft ? -62 : -118) * Math.PI / 180 + rnd(-.32, .32);
+    const sp = rnd(650, 1350) * sc;
+    confetti.push({x: ox, y: oy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: rnd(0, 6), vr: rnd(-12, 12),
+      w: rnd(6, 12), h: rnd(4, 8), c: PARTY[(Math.random() * PARTY.length) | 0], f: rnd(0, 6), fs: rnd(6, 14), round: Math.random() < .2});
+  }
+}
+function rain(k) {
+  for (let i = 0; i < k; i++) confetti.push({x: rnd(0, W), y: rnd(-H * .4, -10), vx: rnd(-40, 40), vy: rnd(50, 150), r: rnd(0, 6), vr: rnd(-8, 8),
+    w: rnd(6, 11), h: rnd(4, 7), c: PARTY[(Math.random() * PARTY.length) | 0], f: rnd(0, 6), fs: rnd(6, 14), round: Math.random() < .2});
+}
+function launch() {
+  const x = rnd(W * .12, W * .88);
+  rockets.push({x, y: H + 5, vx: rnd(-30, 30), vy: -rnd(.85, 1.1) * Math.sqrt(2 * 520 * (H - rnd(H * .12, H * .38))), hue: PARTY[(Math.random() * 5) | 0], t: 0});
+}
+function burst(x, y, col) {
+  const n = LOW ? 35 : 90, alt = PARTY[(Math.random() * PARTY.length) | 0];
+  const sp0 = rnd(180, 320) * Math.max(.7, Math.min(W, H) / 700);
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, sp = sp0 * Math.sqrt(Math.random()) + 20;
+    sparks.push({x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rnd(1.1, 1.8), age: 0, c: Math.random() < .7 ? col : alt, tw: Math.random() < .3});
+  }
+  flash = Math.min(1, flash + .5);
+  boom(.22);
+}
+function addSmoke(c, k) {
+  for (let i = 0; i < k; i++) smoke.push({x: c.x + rnd(-1, 1), y: c.y - G.ch - G.cw * .5, vx: rnd(-6, 6), vy: rnd(-55, -35), age: 0, life: rnd(1.6, 2.6), s: rnd(0, 6), r0: G.cw * .25});
+}
+
+/* ---------- game flow ---------- */
+function extinguish(c) {
+  c.alive = false; c.ember = 1; c.smokeT = 1.4; addSmoke(c, 6); puff();
+}
+function setBlowLabel() {
+  const el = $('blowLabel');
+  const left = candles.filter(c => c.alive).length;
+  el.hidden = state !== 'play';
+  el.textContent = blowing ? (left === 1 ? 'Последняя!' : 'Ещё, ещё!') : 'Дуй!';
+  el.classList.toggle('hard', blowing);
+}
+function begin() {
+  $('start').hidden = true; $('foot').hidden = false;
+  state = 'play'; shuffle();
+}
+function celebrate() {
+  state = 'party'; partyT = 0; nextFw = .5;
+  waves = [{t: 1.6, fn: () => { popper(true); popper(false); pop(0, .6); pop(.07, .5); }}, {t: 3.2, fn: () => rain(LOW ? 60 : 180)}];
+  $('intro').hidden = true;
+  const title = NAME ? `С днём рождения, ${NAME}!` : 'С днём рождения!';
+  const h = $('finalTitle'); h.textContent = '';
+  let k = 0; const cols = ['var(--rose)', 'var(--butter)', 'var(--mint)', 'var(--flame)', 'var(--violet)', 'var(--ink)'];
+  title.split(' ').forEach((word, wi, arr) => {
+    const w = document.createElement('span'); w.className = 'w';
+    for (const ch of word) {
+      const l = document.createElement('span'); l.className = 'l'; l.textContent = ch;
+      l.style.animationDelay = (k * 45) + 'ms'; l.style.color = cols[k % cols.length]; k++; w.appendChild(l);
+    }
+    h.appendChild(w); if (wi < arr.length - 1) h.appendChild(document.createTextNode(' '));
+  });
+  $('final').hidden = false;
+  popper(true); popper(false); pop(0, .8); pop(.05, .7); pop(.12, .6);
+  playMelody(.9);
+}
+function reset() {
+  stopMusic();
+  candles.forEach(c => { c.alive = true; c.flame = 0; c.ember = 0; c.smokeT = 0; });
+  confetti.length = sparks.length = rockets.length = 0;
+  prog = 0; state = 'play'; shuffle();
+  $('final').hidden = true; $('intro').hidden = false;
+}
+
+/* ---------- update ---------- */
+const PER = .45;
+function update(dt) {
+  listen(dt);
+  if (state === 'play') {
+    if (blowing) prog += dt * (.5 + 1.6 * blowLevel); else prog = Math.max(0, prog - dt * .3);
+    lastOut += dt;
+    const next = order.find(c => c.alive);
+    if (next && prog >= PER && lastOut > .14) { prog -= PER; lastOut = 0; extinguish(next); }
+    if (!candles.some(c => c.alive)) { state = 'dark'; darkT = 0; prog = 0; }
+  } else if (state === 'dark') {
+    darkT += dt; if (darkT > 1.3) celebrate();
+  } else if (state === 'party') {
+    partyT += dt;
+    waves = waves.filter(w => (partyT >= w.t ? (w.fn(), false) : true));
+    nextFw -= dt;
+    if (nextFw <= 0) { launch(); if (partyT < 9 && Math.random() < .5) launch(); nextFw = partyT < 9 ? rnd(.35, .8) : rnd(1.2, 2.4); }
+  }
+  setBlowLabel();
+
+  // flames
+  const target = order.find(c => c.alive);
+  let sum = 0;
+  for (const c of candles) {
+    if (c.alive) c.flame = Math.min(1, c.flame + dt * 3);
+    else c.flame = Math.max(0, c.flame - dt * 9);
+    c.ember = Math.max(0, c.ember - dt * .7);
+    if (c.smokeT > 0) { c.smokeT -= dt; if (Math.random() < c.smokeT * 14 * dt * 4) addSmoke(c, 1); }
+    c.shrink = (c === target && state === 'play') ? clamp(prog / PER, 0, 1) : 0;
+    sum += c.flame;
+  }
+  light = sum / N;
+  roomLight += ((state === 'party' ? 1 : 0) - roomLight) * Math.min(1, dt * 1.5);
+  flash = Math.max(0, flash - dt * 2.2);
+
+  for (let i = smoke.length - 1; i >= 0; i--) {
+    const p = smoke[i]; p.age += dt;
+    p.x += (p.vx + Math.sin(p.age * 3 + p.s) * 14) * dt; p.y += p.vy * dt; p.vy *= (1 - .3 * dt);
+    if (p.age > p.life) smoke.splice(i, 1);
+  }
+  for (let i = confetti.length - 1; i >= 0; i--) {
+    const p = confetti[i];
+    p.vy += 900 * dt; const drag = Math.pow(.12, dt); p.vx *= drag; p.vy = Math.min(p.vy * Math.pow(.35, dt), 260);
+    p.vx += Math.sin(T * 3 + p.f) * 30 * dt;
+    p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt; p.f += p.fs * dt;
+    if (p.y > H + 40) confetti.splice(i, 1);
+  }
+  for (let i = rockets.length - 1; i >= 0; i--) {
+    const r = rockets[i]; r.t += dt; r.vy += 520 * dt; r.x += r.vx * dt; r.y += r.vy * dt;
+    if (r.vy >= -40) { burst(r.x, r.y, r.hue); rockets.splice(i, 1); }
+  }
+  for (let i = sparks.length - 1; i >= 0; i--) {
+    const s = sparks[i]; s.age += dt; s.vy += 140 * dt; const d = Math.pow(.25, dt); s.vx *= d; s.vy *= d;
+    s.x += s.vx * dt; s.y += s.vy * dt; if (s.age > s.life) sparks.splice(i, 1);
+  }
+}
+
+/* ---------- drawing ---------- */
+function ell(cx, cy, rx, ry) { ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); }
+function cylinder(cx, top, w, h, ry, cols) {
+  const x = cx - w / 2;
+  ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, top + h);
+  ctx.ellipse(cx, top + h, w / 2, ry, 0, Math.PI, 0, true);
+  ctx.lineTo(x + w, top); ctx.closePath();
+  const g = ctx.createLinearGradient(x, 0, x + w, 0);
+  g.addColorStop(0, cols[2]); g.addColorStop(.3, cols[0]); g.addColorStop(.55, cols[1]); g.addColorStop(1, cols[2]);
+  ctx.fillStyle = g; ctx.fill();
+}
+function icing(cx, top, w, h, ry, drips, col, hi) {
+  ctx.beginPath();
+  ctx.ellipse(cx, top, w / 2 * 1.015, ry * 1.02, 0, 0, Math.PI, true);
+  const steps = 140;
+  for (let k = 0; k <= steps; k++) {
+    const s = k / steps, a = Math.PI - s * Math.PI;
+    let d = .07;
+    for (const dr of drips) d += dr.L * Math.exp(-Math.pow((s - dr.s) / dr.w, 2));
+    ctx.lineTo(cx + Math.cos(a) * w / 2 * 1.015, top + Math.sin(a) * ry * 1.02 + d * h * Math.pow(Math.sin(a), .4));
+  }
+  ctx.closePath(); ctx.fillStyle = col; ctx.fill();
+  const g = ctx.createRadialGradient(cx - w * .12, top - ry * .3, 2, cx, top, w / 2);
+  g.addColorStop(0, hi); g.addColorStop(1, 'rgba(255,255,255,0)');
+  ell(cx, top, w / 2, ry); ctx.fillStyle = g; ctx.fill();
+}
+function drawCake() {
+  const {cx, baseY, w1, h1, ry1, w2, h2, ry2, top1, top2} = G;
+  // shadow + plate
+  ell(cx, baseY + ry1 * .55, w1 * .66, ry1 * 1.25); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fill();
+  ell(cx, baseY + ry1 * .25, w1 * .64, ry1 * 1.3); ctx.fillStyle = '#cfc6e6'; ctx.fill();
+  ell(cx, baseY + ry1 * .12, w1 * .6, ry1 * 1.15); ctx.fillStyle = '#efe9fb'; ctx.fill();
+  // tier 1
+  cylinder(cx, top1, w1, h1, ry1, ['#ef7aa0', '#ff9fbd', '#9c3a62']);
+  // sprinkles
+  const sc = w1 / 340;
+  for (const s of SPRINKLES) {
+    const x = cx + s.u * w1 / 2, y = top1 + ry1 * Math.sqrt(1 - s.u * s.u) + s.v * h1;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(s.a); ctx.fillStyle = s.c;
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-5 * sc, -1.4 * sc, 10 * sc, 2.8 * sc, 1.4 * sc) : ctx.rect(-5 * sc, -1.4 * sc, 10 * sc, 2.8 * sc); ctx.fill(); ctx.restore();
+  }
+  icing(cx, top1, w1, h1, ry1, DRIPS1, '#fff1e2', 'rgba(255,255,255,.7)');
+  // tier 2
+  cylinder(cx, top2, w2, h2, ry2, ['#ffe0b0', '#fff0d4', '#c9935a']);
+  icing(cx, top2, w2, h2, ry2, DRIPS2, '#ff8fb1', 'rgba(255,220,235,.75)');
+  // berries rim on tier 1
+  const k = 9;
+  for (let i = 0; i < k; i++) {
+    const u = -0.85 + 1.7 * i / (k - 1);
+    const x = cx + u * w1 / 2 * .93, y = top1 + ry1 * .78 * Math.sqrt(1 - u * u) - ry1 * .05;
+    const r = w1 * .022;
+    const g = ctx.createRadialGradient(x - r * .3, y - r * .4, 1, x, y, r);
+    g.addColorStop(0, '#ff8c9c'); g.addColorStop(1, '#b3122f');
+    ell(x, y, r, r); ctx.fillStyle = g; ctx.fill();
+  }
+}
+function drawCandle(c) {
+  const w = G.cw, h = G.ch, left = c.x - w / 2, top = c.y - h;
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(left, top, w, h, w * .22) : ctx.rect(left, top, w, h);
+  ctx.fillStyle = c.col[0]; ctx.fill(); ctx.clip();
+  ctx.fillStyle = c.col[1];
+  const step = w * 1.1;
+  for (let y = top - w; y < top + h + w; y += step) {
+    ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(left + w, y - w * .55); ctx.lineTo(left + w, y - w * .55 + w * .4); ctx.lineTo(left, y + w * .4); ctx.fill();
+  }
+  const g = ctx.createLinearGradient(left, 0, left + w, 0);
+  g.addColorStop(0, 'rgba(0,0,0,.28)'); g.addColorStop(.35, 'rgba(255,255,255,.22)'); g.addColorStop(1, 'rgba(0,0,0,.35)');
+  ctx.fillStyle = g; ctx.fillRect(left, top, w, h);
+  ctx.restore();
+  ell(c.x, top, w / 2, w * .18); ctx.fillStyle = c.col[0]; ctx.fill();
+  // wick
+  const lean = c.alive ? (Math.sin(T * 2 + c.ph) * .1 + blowLevel * .5) * w * .25 : 0;
+  ctx.strokeStyle = '#2b1d14'; ctx.lineWidth = Math.max(1.2, w * .13); ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(c.x, top); ctx.quadraticCurveTo(c.x, top - w * .3, c.x + lean, top - w * .55); ctx.stroke();
+  if (c.ember > 0) {
+    ell(c.x, top - w * .55, w * .14, w * .14); ctx.fillStyle = `rgba(255,${80 + c.ember * 80 | 0},40,${c.ember})`; ctx.fill();
+  }
+}
+function drawFlame(c) {
+  if (c.flame <= 0.01) return;
+  const w = G.cw, fx = c.x, fy = c.y - G.ch - w * .55;
+  const flick = 1 + .07 * Math.sin(T * 13 + c.ph) + .05 * Math.sin(T * 23.7 + c.ph * 2) + .03 * Math.sin(T * 41 + c.ph);
+  let s = w * .95 * flick * c.flame * (1 - .25 * blowLevel) * (1 - .55 * c.shrink);
+  const jitter = blowLevel * (Math.sin(T * 31 + c.ph) * .4 + Math.sin(T * 17 + c.ph) * .3);
+  const lean = Math.sin(T * 2.6 + c.ph) * .12 + blowLevel * 1.1 + jitter + c.shrink * .3;
+  const tipX = fx + lean * s * 1.4, tipY = fy - s * 2.5 * (1 - .2 * blowLevel);
+  // glow
+  ctx.globalCompositeOperation = 'lighter';
+  const gr = ctx.createRadialGradient(fx, fy - s, 0, fx, fy - s, s * 7);
+  gr.addColorStop(0, `rgba(255,170,70,${.32 * c.flame})`); gr.addColorStop(1, 'rgba(255,120,40,0)');
+  ctx.fillStyle = gr; ctx.fillRect(fx - s * 7, fy - s * 8, s * 14, s * 14);
+  ctx.globalCompositeOperation = 'source-over';
+  // body
+  ctx.beginPath(); ctx.moveTo(tipX, tipY);
+  ctx.bezierCurveTo(fx + s * .95 + lean * s * .4, fy - s * 1.1, fx + s * .75, fy + s * .45, fx, fy + s * .5);
+  ctx.bezierCurveTo(fx - s * .75, fy + s * .45, fx - s * .95 + lean * s * .4, fy - s * 1.1, tipX, tipY);
+  const g = ctx.createRadialGradient(fx, fy - s * .1, s * .1, fx + lean * s * .4, fy - s * .6, s * 2.3);
+  g.addColorStop(0, 'rgba(255,255,240,1)'); g.addColorStop(.3, 'rgba(255,226,120,1)'); g.addColorStop(.62, 'rgba(255,140,40,.95)'); g.addColorStop(1, 'rgba(230,60,20,.1)');
+  ctx.fillStyle = g; ctx.fill();
+  // blue core
+  ell(fx, fy + s * .15, s * .32, s * .42); ctx.fillStyle = 'rgba(90,140,255,.45)'; ctx.fill();
+}
+function drawBackground() {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  const b = roomLight;
+  g.addColorStop(0, `rgb(${14 + b * 30 | 0},${11 + b * 10 | 0},${31 + b * 40 | 0})`);
+  g.addColorStop(1, `rgb(${33 + b * 40 | 0},${20 + b * 14 | 0},${63 + b * 30 | 0})`);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  // party bokeh
+  const ba = .1 + .25 * roomLight + .15 * flash;
+  for (const k of BOKEH) {
+    const x = k.x * W + Math.sin(T * .2 + k.p) * 20, y = k.y * H + Math.cos(T * .17 + k.p) * 14;
+    const rg = ctx.createRadialGradient(x, y, 0, x, y, k.r);
+    rg.addColorStop(0, `hsla(${k.h},90%,65%,${ba * (.5 + .5 * Math.sin(T * .8 + k.p))})`); rg.addColorStop(1, `hsla(${k.h},90%,65%,0)`);
+    ctx.fillStyle = rg; ctx.fillRect(x - k.r, y - k.r, k.r * 2, k.r * 2);
+  }
+  // candle light on the room
+  const cy = G.top2 - G.ch;
+  const lg = ctx.createRadialGradient(G.cx, cy, 0, G.cx, cy, Math.max(W, H) * .65);
+  lg.addColorStop(0, `rgba(255,170,80,${.3 * light})`); lg.addColorStop(.5, `rgba(255,120,60,${.08 * light})`); lg.addColorStop(1, 'rgba(255,120,60,0)');
+  ctx.fillStyle = lg; ctx.fillRect(0, 0, W, H);
+}
+function draw() {
+  drawBackground();
+  drawCake();
+  const sorted = candles.slice().sort((a, b) => a.y - b.y);
+  sorted.forEach(drawCandle);
+  // darkness: the candles are the only light until the party starts
+  const dark = clamp(.62 * (1 - light) * (1 - roomLight) - flash * .25, 0, .7);
+  if (dark > 0) { ctx.fillStyle = `rgba(6,4,16,${dark})`; ctx.fillRect(0, 0, W, H); }
+  sorted.forEach(drawFlame);
+  // smoke
+  for (const p of smoke) {
+    const k = p.age / p.life, r = p.r0 + k * G.cw * 1.6;
+    ell(p.x, p.y, r, r); ctx.fillStyle = `rgba(205,200,220,${.32 * (1 - k)})`; ctx.fill();
+  }
+  // fireworks
+  ctx.globalCompositeOperation = 'lighter';
+  for (const r of rockets) { ell(r.x, r.y, 2.4, 2.4); ctx.fillStyle = '#fff3c4'; ctx.fill(); ctx.fillStyle = 'rgba(255,200,120,.35)'; ctx.fillRect(r.x - 1, r.y, 2, 22); }
+  for (const s of sparks) {
+    const k = 1 - s.age / s.life; if (s.tw && Math.sin(T * 40 + s.x) > .3) continue;
+    ctx.globalAlpha = Math.max(0, k); ell(s.x, s.y, 1.2 + 1.6 * k, 1.2 + 1.6 * k); ctx.fillStyle = s.c; ctx.fill();
+  }
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  // confetti
+  for (const p of confetti) {
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.scale(1, Math.cos(p.f));
+    ctx.fillStyle = p.c;
+    if (p.round) { ell(0, 0, p.w * .4, p.w * .4); ctx.fill(); } else ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+    ctx.restore();
+  }
+}
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now; T += dt;
+  update(dt); draw();
+  requestAnimationFrame(frame);
+}
+
+/* ---------- controls ---------- */
+$('go').addEventListener('click', async () => {
+  try { await startMic(); $('note').innerHTML = '<span class="hint-key">Нет микрофона? Зажми пробел или </span>удерживай палец на торте'; }
+  catch (e) {
+    const why = (e && e.message === 'nomedia') ? 'Микрофон тут недоступен (нужен https или localhost).' : 'Доступ к микрофону не дали.';
+    $('note').textContent = why + ' Зажми пробел или удерживай палец на торте.';
+  }
+  begin();
+});
+$('nomic').addEventListener('click', () => { ensureAudio(); $('note').textContent = 'Зажми пробел или удерживай палец на торте, чтобы дуть.'; begin(); });
+$('again').addEventListener('click', reset);
+$('mute').addEventListener('click', () => {
+  muted = !muted; if (master) master.gain.value = muted ? 0 : .8; $('mute').textContent = muted ? 'Звук: выкл' : 'Звук: вкл';
+});
+addEventListener('keydown', e => { if (e.code === 'Space' && state !== 'idle') { e.preventDefault(); holding = true; } });
+addEventListener('keyup', e => { if (e.code === 'Space') holding = false; });
+cvs.addEventListener('pointerdown', e => { if (state !== 'idle') { holding = true; cvs.setPointerCapture(e.pointerId); } });
+['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => cvs.addEventListener(ev, () => holding = false));
+addEventListener('blur', () => holding = false);
+
+resize();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
