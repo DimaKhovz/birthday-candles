@@ -1,9 +1,11 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Задуй свечи</title>
+<title>Blow Out the Candles</title>
+<meta name="description" content="A birthday card you blow on: the candles go out one by one, then the party starts.">
+<meta name="theme-color" content="#0e0b1f">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
@@ -26,7 +28,7 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 
 .hud{position:fixed;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + clamp(20px,5vh,48px)) 16px 0;
   text-align:center;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:.5rem}
-.hud h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,5.6vw,60px);line-height:1.08;margin:0;
+.hud h1{text-shadow:0 2px 24px rgba(0,0,0,.45);font-family:var(--display);font-weight:800;font-size:clamp(26px,5.6vw,60px);line-height:1.08;margin:0;
   letter-spacing:-.01em;text-wrap:balance;max-width:16ch}
 .hud p{margin:0;font-size:clamp(15px,2.2vw,20px);color:var(--ink-dim);text-wrap:balance}
 
@@ -42,9 +44,11 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 #final p{animation:fade 1s 1.2s both}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-.btn{pointer-events:auto;font:700 16px/1 var(--body);color:var(--night);background:var(--butter);border:0;border-radius:999px;
-  padding:16px 26px;cursor:pointer;box-shadow:0 8px 30px rgba(255,200,80,.25);transition:transform .15s}
-.btn:hover{transform:translateY(-2px)}
+.btn{pointer-events:auto;font:700 16px/1 var(--body);color:#2a1706;background:linear-gradient(180deg,#ffe58a,#ffbf47);border:0;border-radius:999px;
+  padding:17px 30px;cursor:pointer;box-shadow:0 10px 34px rgba(255,170,60,.35),inset 0 1px 0 rgba(255,255,255,.6);
+  transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(255,170,60,.45),inset 0 1px 0 rgba(255,255,255,.6)}
+.btn:active{transform:translateY(1px) scale(.98)}
 .btn:focus-visible,.link:focus-visible,.chip:focus-visible,input:focus-visible{outline:3px solid var(--mint);outline-offset:3px}
 .link{pointer-events:auto;background:none;border:0;color:var(--ink-dim);font:600 14px var(--body);text-decoration:underline;
   text-underline-offset:3px;cursor:pointer;padding:8px}
@@ -52,7 +56,8 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 
 /* start screen */
 #start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;
-  padding:24px 16px;text-align:center;background:radial-gradient(ellipse at 50% 60%,rgba(14,11,31,.35),rgba(14,11,31,.88) 70%)}
+  padding:24px 16px;text-align:center;background:radial-gradient(ellipse at 50% 55%,rgba(14,11,31,.8),rgba(14,11,31,.93) 75%);
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 #start h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,6vw,62px);line-height:1.08;margin:0;max-width:14ch;text-wrap:balance}
 #start p{margin:0;color:var(--ink-dim);max-width:34ch;font-size:16px;line-height:1.5}
 
@@ -63,7 +68,7 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 .bar{position:relative;width:120px;height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
 .bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--mint),var(--butter),var(--rose));border-radius:99px}
 .bar b{position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:var(--ink)}
-.chip{pointer-events:auto;background:rgba(255,255,255,.08);color:var(--ink);border:1px solid rgba(255,255,255,.14);
+.chip{pointer-events:auto;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);background:rgba(255,255,255,.08);color:var(--ink);border:1px solid rgba(255,255,255,.14);
   border-radius:99px;padding:7px 12px;font:600 13px var(--body);cursor:pointer}
 label.sens{display:flex;align-items:center;gap:8px}
 input[type=range]{width:90px;accent-color:var(--flame)}
@@ -73,34 +78,34 @@ input[type=range]{width:90px;accent-color:var(--flame)}
 </style>
 </head>
 <body>
-<canvas id="stage" aria-label="Торт со свечами"></canvas>
+<canvas id="stage" aria-label="A birthday cake with candles"></canvas>
 
 <div class="hud" id="intro">
-  <h1>Задуй свечи</h1>
-  <p>и загадай желание</p>
-  <div class="blow" id="blowLabel" hidden>Дуй!</div>
+  <h1>Blow out the candles</h1>
+  <p>and make a wish</p>
+  <div class="blow" id="blowLabel" hidden>Blow!</div>
 </div>
 
 <div class="hud" id="final" hidden>
   <h1 id="finalTitle"></h1>
-  <p>Желание загадано. Пусть сбудется!</p>
-  <button class="btn" id="again" type="button">Зажечь свечи ещё раз</button>
+  <p>Your wish is made. May it come true!</p>
+  <button class="btn" id="again" type="button">Light the candles again</button>
 </div>
 
 <div id="start">
-  <h1>Задуй свечи и загадай желание</h1>
-  <p>Странице нужен микрофон: она слышит, когда ты дуешь, и свечи гаснут одна за другой.</p>
-  <button class="btn" id="go" type="button">Включить микрофон</button>
-  <button class="link" id="nomic" type="button">Без микрофона</button>
+  <h1>Blow out the candles and make a wish</h1>
+  <p>This page listens through your microphone: when you blow, the candles go out one by one.</p>
+  <button class="btn" id="go" type="button">Turn on the microphone</button>
+  <button class="link" id="nomic" type="button">Continue without a microphone</button>
 </div>
 
 <div class="foot" id="foot" hidden>
-  <div class="meter" title="Громкость с микрофона. Черта — порог задувания">
-    <span>Микрофон</span><div class="bar"><i id="lvl"></i><b></b></div>
+  <div class="meter" title="Microphone level. The line is the blow-out threshold.">
+    <span>Microphone</span><div class="bar"><i id="lvl"></i><b></b></div>
   </div>
-  <label class="sens">Чувствительность <input id="sens" type="range" min="1" max="10" value="6"></label>
-  <button class="chip" id="mute" type="button">Звук: вкл</button>
-  <div class="note" id="note"><span class="hint-key">Нет микрофона? Зажми пробел или </span>удерживай палец на торте</div>
+  <label class="sens">Sensitivity <input id="sens" type="range" min="1" max="10" value="6"></label>
+  <button class="chip" id="mute" type="button">Sound: on</button>
+  <div class="note" id="note"><span class="hint-key">No microphone? Hold Space, or </span>press and hold on the cake</div>
 </div>
 
 <script>
@@ -125,12 +130,24 @@ const DRIPS1 = mkDrips(13), DRIPS2 = mkDrips(10);
 const SPR_COL = ['#ffd65a', '#5fe0c3', '#a98bff', '#ffffff', '#ff9a3c', '#3fb8ff'];
 const SPRINKLES = Array.from({length: 46}, () => ({u: (srnd() * 2 - 1) * .9, v: .42 + srnd() * .45, a: srnd() * Math.PI, c: SPR_COL[(srnd() * SPR_COL.length) | 0]}));
 const BOKEH = Array.from({length: 16}, () => ({x: srnd(), y: srnd() * .7, r: 20 + srnd() * 60, h: [330, 45, 170, 260][(srnd() * 4) | 0], p: srnd() * 6}));
+const STARS = Array.from({length: 46}, () => ({x: srnd(), y: srnd() * .5, r: .5 + srnd() * 1.2, p: srnd() * 6}));
+const MOTES = Array.from({length: 34}, () => ({x: srnd(), y: srnd(), r: .6 + srnd() * 1.5, v: 5 + srnd() * 11, p: srnd() * 6}));
 const CANDLE_COL = [['#fff4e0', '#ff5d8f'], ['#eaf8ff', '#3fb8ff'], ['#fff9d6', '#ffb800'], ['#ecfff7', '#2fc79a'], ['#f6ecff', '#9b6bff']];
+
+/* ---------- soft sprites (drawn many times, so they are rendered once) ---------- */
+function sprite(rgb, mid) {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const x = c.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, `rgba(${rgb},1)`); g.addColorStop(.4, `rgba(${rgb},${mid})`); g.addColorStop(1, `rgba(${rgb},0)`);
+  x.fillStyle = g; x.fillRect(0, 0, 64, 64); return c;
+}
+const SMOKE = sprite('176,170,204', .32), GLOW = sprite('255,170,70', .35);
 
 /* ---------- state ---------- */
 let G = {};
 const candles = Array.from({length: N}, (_, i) => ({
-  i, alive: true, flame: 1, ember: 0, smokeT: 0, ph: Math.random() * 10, col: CANDLE_COL[i % CANDLE_COL.length], x: 0, y: 0
+  i, alive: true, flame: 1, ember: 0, smokeT: 0, acc: 0, ph: Math.random() * 10, col: CANDLE_COL[i % CANDLE_COL.length], x: 0, y: 0,
+  dl: Math.random() < .7 ? .16 + Math.random() * .34 : 0, dx: .12 + Math.random() * .5
 }));
 let order = [];
 let state = 'idle';           // idle | play | dark | party
@@ -309,19 +326,24 @@ function burst(x, y, col) {
   flash = Math.min(1, flash + .5);
   boom(.22);
 }
-function addSmoke(c, k) {
-  for (let i = 0; i < k; i++) smoke.push({x: c.x + rnd(-1, 1), y: c.y - G.ch - G.cw * .5, vx: rnd(-6, 6), vy: rnd(-55, -35), age: 0, life: rnd(1.6, 2.6), s: rnd(0, 6), r0: G.cw * .25});
+function addSmoke(c, k, burst) {
+  const w = G.cw;
+  for (let i = 0; i < k && smoke.length < 1000; i++) smoke.push({
+    x: c.x + rnd(-.5, .5), y: c.y - G.ch - w * .55 - rnd(0, w * .3),
+    vx: rnd(-4, 4) + (burst ? rnd(-26, 26) : 0), vy: -rnd(burst ? 70 : 40, burst ? 125 : 64),
+    age: 0, life: rnd(2.6, 4.4), s: rnd(0, 6.28), f: rnd(1.3, 2.6), r0: w * rnd(.05, .09), g: rnd(.9, 1.5)
+  });
 }
 
 /* ---------- game flow ---------- */
 function extinguish(c) {
-  c.alive = false; c.ember = 1; c.smokeT = 1.4; addSmoke(c, 6); puff();
+  c.alive = false; c.ember = 1; c.smokeT = 3; c.acc = 0; addSmoke(c, 12, true); puff();
 }
 function setBlowLabel() {
   const el = $('blowLabel');
   const left = candles.filter(c => c.alive).length;
   el.hidden = state !== 'play';
-  el.textContent = blowing ? (left === 1 ? 'Последняя!' : 'Ещё, ещё!') : 'Дуй!';
+  el.textContent = blowing ? (left === 1 ? 'The last one!' : 'More, more!') : 'Blow!';
   el.classList.toggle('hard', blowing);
 }
 function begin() {
@@ -332,7 +354,7 @@ function celebrate() {
   state = 'party'; partyT = 0; nextFw = .5;
   waves = [{t: 1.6, fn: () => { popper(true); popper(false); pop(0, .6); pop(.07, .5); }}, {t: 3.2, fn: () => rain(LOW ? 60 : 180)}];
   $('intro').hidden = true;
-  const title = NAME ? `С днём рождения, ${NAME}!` : 'С днём рождения!';
+  const title = NAME ? `Happy birthday, ${NAME}!` : 'Happy birthday!';
   const h = $('finalTitle'); h.textContent = '';
   let k = 0; const cols = ['var(--rose)', 'var(--butter)', 'var(--mint)', 'var(--flame)', 'var(--violet)', 'var(--ink)'];
   title.split(' ').forEach((word, wi, arr) => {
@@ -349,7 +371,8 @@ function celebrate() {
 }
 function reset() {
   stopMusic();
-  candles.forEach(c => { c.alive = true; c.flame = 0; c.ember = 0; c.smokeT = 0; });
+  smoke.length = 0;
+  candles.forEach(c => { c.alive = true; c.flame = 0; c.ember = 0; c.smokeT = 0; c.acc = 0; });
   confetti.length = sparks.length = rockets.length = 0;
   prog = 0; state = 'play'; shuffle();
   $('final').hidden = true; $('intro').hidden = false;
@@ -382,7 +405,10 @@ function update(dt) {
     if (c.alive) c.flame = Math.min(1, c.flame + dt * 3);
     else c.flame = Math.max(0, c.flame - dt * 9);
     c.ember = Math.max(0, c.ember - dt * .7);
-    if (c.smokeT > 0) { c.smokeT -= dt; if (Math.random() < c.smokeT * 14 * dt * 4) addSmoke(c, 1); }
+    if (c.smokeT > 0) { // a thin thread of smoke rises from the wick and fades out
+      c.smokeT -= dt; c.acc += dt * 38 * Math.min(1, c.smokeT / 1.6);
+      while (c.acc >= 1) { c.acc -= 1; addSmoke(c, 1); }
+    }
     c.shrink = (c === target && state === 'play') ? clamp(prog / PER, 0, 1) : 0;
     sum += c.flame;
   }
@@ -391,8 +417,9 @@ function update(dt) {
   flash = Math.max(0, flash - dt * 2.2);
 
   for (let i = smoke.length - 1; i >= 0; i--) {
-    const p = smoke[i]; p.age += dt;
-    p.x += (p.vx + Math.sin(p.age * 3 + p.s) * 14) * dt; p.y += p.vy * dt; p.vy *= (1 - .3 * dt);
+    const p = smoke[i]; p.age += dt; const k = p.age / p.life;
+    p.x += (p.vx + Math.sin(p.age * p.f + p.s) * (8 + 46 * k) * Math.min(1, p.age * 1.6)) * dt;
+    p.y += p.vy * dt; p.vy += (-14 - p.vy) * Math.min(1, .9 * dt); p.vx *= (1 - .5 * dt);
     if (p.age > p.life) smoke.splice(i, 1);
   }
   for (let i = confetti.length - 1; i >= 0; i--) {
@@ -456,6 +483,13 @@ function drawCake() {
   icing(cx, top1, w1, h1, ry1, DRIPS1, '#fff1e2', 'rgba(255,255,255,.7)');
   // tier 2
   cylinder(cx, top2, w2, h2, ry2, ['#ffe0b0', '#fff0d4', '#c9935a']);
+  for (let i = 0; i < 17; i++) { // piped pearls along the base of the upper tier
+    const a = .08 * Math.PI + (.84 * Math.PI) * i / 16, r = w2 * .021;
+    const x = cx - Math.cos(a) * w2 / 2 * .985, y = top1 + Math.sin(a) * ry2 * .98;
+    const pg = ctx.createRadialGradient(x - r * .35, y - r * .4, 0, x, y, r * 1.1);
+    pg.addColorStop(0, '#ffffff'); pg.addColorStop(.6, '#ffe9d2'); pg.addColorStop(1, '#d9a98a');
+    ell(x, y, r, r); ctx.fillStyle = pg; ctx.fill();
+  }
   icing(cx, top2, w2, h2, ry2, DRIPS2, '#ff8fb1', 'rgba(255,220,235,.75)');
   // berries rim on tier 1
   const k = 9;
@@ -469,7 +503,9 @@ function drawCake() {
   }
 }
 function drawCandle(c) {
-  const w = G.cw, h = G.ch, left = c.x - w / 2, top = c.y - h;
+  const w = G.cw, h = G.ch, left = c.x - w / 2, top = c.y - h, fl = c.flame;
+  // contact shadow on the icing
+  ell(c.x + w * .3, c.y + w * .04, w * .78, w * .24); ctx.fillStyle = 'rgba(70,10,45,.3)'; ctx.fill();
   ctx.save();
   ctx.beginPath(); ctx.roundRect ? ctx.roundRect(left, top, w, h, w * .22) : ctx.rect(left, top, w, h);
   ctx.fillStyle = c.col[0]; ctx.fill(); ctx.clip();
@@ -478,49 +514,86 @@ function drawCandle(c) {
   for (let y = top - w; y < top + h + w; y += step) {
     ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(left + w, y - w * .55); ctx.lineTo(left + w, y - w * .55 + w * .4); ctx.lineTo(left, y + w * .4); ctx.fill();
   }
+  if (c.dl) { // a drip of melted wax
+    const dx = left + w * c.dx, dw = w * .26, dl = h * c.dl;
+    ctx.fillStyle = c.col[0]; ctx.globalAlpha = .96;
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(dx, top - 2, dw, dl + 2, dw / 2) : ctx.rect(dx, top - 2, dw, dl + 2); ctx.fill();
+    ctx.globalAlpha = 1; ctx.fillStyle = 'rgba(0,0,0,.14)'; ctx.fillRect(dx + dw * .72, top, dw * .28, dl);
+    ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(dx + dw * .18, top, dw * .16, dl * .8);
+  }
   const g = ctx.createLinearGradient(left, 0, left + w, 0);
-  g.addColorStop(0, 'rgba(0,0,0,.28)'); g.addColorStop(.35, 'rgba(255,255,255,.22)'); g.addColorStop(1, 'rgba(0,0,0,.35)');
+  g.addColorStop(0, 'rgba(0,0,0,.32)'); g.addColorStop(.26, 'rgba(255,255,255,.34)'); g.addColorStop(.42, 'rgba(255,255,255,0)');
+  g.addColorStop(.78, 'rgba(0,0,0,.16)'); g.addColorStop(1, 'rgba(0,0,0,.46)');
   ctx.fillStyle = g; ctx.fillRect(left, top, w, h);
+  if (fl > .01) { // warm light from its own flame, running down the wax
+    const lg = ctx.createRadialGradient(c.x, top, 0, c.x, top, h * .95);
+    lg.addColorStop(0, `rgba(255,196,110,${.62 * fl})`); lg.addColorStop(1, 'rgba(255,150,60,0)');
+    ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = lg; ctx.fillRect(left, top, w, h); ctx.globalCompositeOperation = 'source-over';
+  }
   ctx.restore();
-  ell(c.x, top, w / 2, w * .18); ctx.fillStyle = c.col[0]; ctx.fill();
+  // top of the candle: melted pool around the wick
+  ell(c.x, top, w / 2, w * .2); ctx.fillStyle = c.col[0]; ctx.fill();
+  ell(c.x, top + w * .02, w * .37, w * .14);
+  ctx.fillStyle = fl > .01 ? `rgba(255,${210 + 30 * fl | 0},${150 - 30 * fl | 0},${.35 + .5 * fl})` : 'rgba(255,255,255,.28)'; ctx.fill();
+  ell(c.x - w * .12, top - w * .02, w * .12, w * .04); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fill();
   // wick
   const lean = c.alive ? (Math.sin(T * 2 + c.ph) * .1 + blowLevel * .5) * w * .25 : 0;
-  ctx.strokeStyle = '#2b1d14'; ctx.lineWidth = Math.max(1.2, w * .13); ctx.lineCap = 'round';
+  ctx.strokeStyle = '#241811'; ctx.lineWidth = Math.max(1.3, w * .13); ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(c.x, top); ctx.quadraticCurveTo(c.x, top - w * .3, c.x + lean, top - w * .55); ctx.stroke();
-  if (c.ember > 0) {
-    ell(c.x, top - w * .55, w * .14, w * .14); ctx.fillStyle = `rgba(255,${80 + c.ember * 80 | 0},40,${c.ember})`; ctx.fill();
+  const hot = c.alive ? fl : c.ember;
+  if (hot > 0.02) { // glowing tip of the wick
+    const tx = c.x + lean, ty = top - w * .55;
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.drawImage(GLOW, tx - w * .9, ty - w * .9, w * 1.8, w * 1.8);
+    ctx.globalCompositeOperation = 'source-over';
+    ell(tx, ty, w * .1, w * .1); ctx.fillStyle = `rgba(255,${120 + hot * 100 | 0},50,${Math.min(1, hot + .2)})`; ctx.fill();
   }
 }
 function drawFlame(c) {
   if (c.flame <= 0.01) return;
-  const w = G.cw, fx = c.x, fy = c.y - G.ch - w * .55;
-  const flick = 1 + .07 * Math.sin(T * 13 + c.ph) + .05 * Math.sin(T * 23.7 + c.ph * 2) + .03 * Math.sin(T * 41 + c.ph);
-  let s = w * .95 * flick * c.flame * (1 - .25 * blowLevel) * (1 - .55 * c.shrink);
+  const w = G.cw, fl = c.flame, fx = c.x, fy = c.y - G.ch - w * .5;
+  const flick = 1 + .06 * Math.sin(T * 11 + c.ph) + .04 * Math.sin(T * 19.3 + c.ph * 2) + .03 * Math.sin(T * 37 + c.ph * 3);
+  const s = w * .95 * flick * fl * (1 - .25 * blowLevel) * (1 - .55 * c.shrink);
   const jitter = blowLevel * (Math.sin(T * 31 + c.ph) * .4 + Math.sin(T * 17 + c.ph) * .3);
-  const lean = Math.sin(T * 2.6 + c.ph) * .12 + blowLevel * 1.1 + jitter + c.shrink * .3;
-  const tipX = fx + lean * s * 1.4, tipY = fy - s * 2.5 * (1 - .2 * blowLevel);
-  // glow
+  const lean = Math.sin(T * 2.3 + c.ph) * .13 + Math.sin(T * 5.1 + c.ph * 1.7) * .06 + blowLevel * 1.05 + jitter + c.shrink * .3;
+  const hgt = s * 3.2 * (1 - .2 * blowLevel);
+  const tipX = fx + lean * s * 1.5, tipY = fy - hgt;
   ctx.globalCompositeOperation = 'lighter';
-  const gr = ctx.createRadialGradient(fx, fy - s, 0, fx, fy - s, s * 7);
-  gr.addColorStop(0, `rgba(255,170,70,${.32 * c.flame})`); gr.addColorStop(1, 'rgba(255,120,40,0)');
-  ctx.fillStyle = gr; ctx.fillRect(fx - s * 7, fy - s * 8, s * 14, s * 14);
-  ctx.globalCompositeOperation = 'source-over';
-  // body
-  ctx.beginPath(); ctx.moveTo(tipX, tipY);
-  ctx.bezierCurveTo(fx + s * .95 + lean * s * .4, fy - s * 1.1, fx + s * .75, fy + s * .45, fx, fy + s * .5);
-  ctx.bezierCurveTo(fx - s * .75, fy + s * .45, fx - s * .95 + lean * s * .4, fy - s * 1.1, tipX, tipY);
-  const g = ctx.createRadialGradient(fx, fy - s * .1, s * .1, fx + lean * s * .4, fy - s * .6, s * 2.3);
-  g.addColorStop(0, 'rgba(255,255,240,1)'); g.addColorStop(.3, 'rgba(255,226,120,1)'); g.addColorStop(.62, 'rgba(255,140,40,.95)'); g.addColorStop(1, 'rgba(230,60,20,.1)');
-  ctx.fillStyle = g; ctx.fill();
-  // blue core
-  ell(fx, fy + s * .15, s * .32, s * .42); ctx.fillStyle = 'rgba(90,140,255,.45)'; ctx.fill();
+  // soft halo around the flame and a wider pool of light
+  const hr = s * 3.4; ctx.globalAlpha = .55 * fl; ctx.drawImage(GLOW, fx - hr, fy - hgt * .45 - hr, hr * 2, hr * 2);
+  const pr = s * 10; ctx.globalAlpha = .34 * fl * (.9 + .1 * flick); ctx.drawImage(GLOW, fx - pr, fy - hgt * .4 - pr, pr * 2, pr * 2);
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  // body: three nested teardrops, orange -> yellow -> white-hot, and a blue root
+  const drop = (q, stops) => {
+    const tx = fx + (tipX - fx) * q, ty = fy + s * .4 - (hgt + s * .4) * q, wd = s * q * .98;
+    ctx.beginPath(); ctx.moveTo(tx, ty);
+    ctx.bezierCurveTo(fx + wd * .95 + lean * wd * .4, fy - (fy - ty) * .5, fx + wd * .85, fy + s * .5 * q, fx, fy + s * .55 * q);
+    ctx.bezierCurveTo(fx - wd * .85, fy + s * .5 * q, fx - wd * .95 + lean * wd * .4, fy - (fy - ty) * .5, tx, ty);
+    const g = ctx.createLinearGradient(0, fy + s * .5, 0, ty);
+    for (const [o, col] of stops) g.addColorStop(o, col);
+    ctx.fillStyle = g; ctx.fill();
+  };
+  drop(1, [[0, 'rgba(255,196,90,.98)'], [.3, 'rgba(255,138,32,.96)'], [.75, 'rgba(238,74,22,.78)'], [1, 'rgba(210,46,20,0)']]);
+  drop(.7, [[0, 'rgba(255,248,196,1)'], [.45, 'rgba(255,214,92,.98)'], [1, 'rgba(255,190,70,0)']]);
+  drop(.4, [[0, 'rgba(255,255,255,1)'], [.7, 'rgba(255,250,214,.9)'], [1, 'rgba(255,240,180,0)']]);
+  const bg = ctx.createRadialGradient(fx, fy + s * .12, 0, fx, fy + s * .12, s * .7);
+  bg.addColorStop(0, 'rgba(96,150,255,.9)'); bg.addColorStop(1, 'rgba(70,110,255,0)');
+  ctx.save(); ctx.translate(fx, fy + s * .12); ctx.scale(.62, .85); ctx.translate(-fx, -(fy + s * .12));
+  ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(fx, fy + s * .12, s * .7, 0, 6.3); ctx.fill(); ctx.restore();
 }
 function drawBackground() {
-  const g = ctx.createLinearGradient(0, 0, 0, H);
   const b = roomLight;
-  g.addColorStop(0, `rgb(${14 + b * 30 | 0},${11 + b * 10 | 0},${31 + b * 40 | 0})`);
-  g.addColorStop(1, `rgb(${33 + b * 40 | 0},${20 + b * 14 | 0},${63 + b * 30 | 0})`);
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, `rgb(${12 + b * 30 | 0},${9 + b * 10 | 0},${28 + b * 40 | 0})`);
+  g.addColorStop(.7, `rgb(${30 + b * 40 | 0},${18 + b * 14 | 0},${58 + b * 30 | 0})`);
+  g.addColorStop(1, `rgb(${40 + b * 30 | 0},${22 + b * 12 | 0},${66 + b * 26 | 0})`);
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  // twinkling stars through the window of the night
+  for (const st of STARS) {
+    const a = (.22 + .5 * (.5 + .5 * Math.sin(T * 1.2 + st.p))) * (1 - .6 * light * (1 - roomLight));
+    ctx.globalAlpha = a; ell(st.x * W, st.y * H, st.r, st.r); ctx.fillStyle = '#fff6e0'; ctx.fill();
+  }
+  ctx.globalAlpha = 1;
   // party bokeh
   const ba = .1 + .25 * roomLight + .15 * flash;
   for (const k of BOKEH) {
@@ -529,11 +602,30 @@ function drawBackground() {
     rg.addColorStop(0, `hsla(${k.h},90%,65%,${ba * (.5 + .5 * Math.sin(T * .8 + k.p))})`); rg.addColorStop(1, `hsla(${k.h},90%,65%,0)`);
     ctx.fillStyle = rg; ctx.fillRect(x - k.r, y - k.r, k.r * 2, k.r * 2);
   }
-  // candle light on the room
+  // the table the cake stands on
+  const ty = G.baseY - G.h1 * .3;
+  const tg = ctx.createLinearGradient(0, ty, 0, H);
+  tg.addColorStop(0, `rgb(${58 + b * 20 | 0},${34 + b * 10 | 0},${86 + b * 20 | 0})`); tg.addColorStop(1, `rgb(${22 + b * 10 | 0},${13 + b * 6 | 0},${42 + b * 12 | 0})`);
+  ctx.fillStyle = tg; ctx.fillRect(0, ty, W, H - ty);
+  const eg = ctx.createLinearGradient(0, ty - 2, 0, ty + 10);
+  eg.addColorStop(0, `rgba(255,214,170,${.05 + .2 * light})`); eg.addColorStop(1, 'rgba(255,214,170,0)');
+  ctx.fillStyle = eg; ctx.fillRect(0, ty - 2, W, 12);
+  // candle light on the room and on the table
   const cy = G.top2 - G.ch;
   const lg = ctx.createRadialGradient(G.cx, cy, 0, G.cx, cy, Math.max(W, H) * .65);
   lg.addColorStop(0, `rgba(255,170,80,${.3 * light})`); lg.addColorStop(.5, `rgba(255,120,60,${.08 * light})`); lg.addColorStop(1, 'rgba(255,120,60,0)');
   ctx.fillStyle = lg; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.translate(G.cx, G.baseY + G.ry1 * .5); ctx.scale(1, .26);
+  const tl = ctx.createRadialGradient(0, 0, 0, 0, 0, G.w1 * 1.15);
+  tl.addColorStop(0, `rgba(255,190,110,${.42 * light})`); tl.addColorStop(1, 'rgba(255,150,80,0)');
+  ctx.fillStyle = tl; ctx.fillRect(-G.w1 * 1.2, -G.w1 * 1.2, G.w1 * 2.4, G.w1 * 2.4); ctx.restore();
+  // dust motes drifting in the candle light
+  if (light > .02) for (const m of MOTES) {
+    const x = m.x * W + Math.sin(T * .3 + m.p) * 18, y = ((m.y * H - T * m.v) % H + H) % H;
+    const d = Math.hypot(x - G.cx, y - cy) / (Math.max(W, H) * .55);
+    ctx.globalAlpha = Math.max(0, (1 - d)) * .55 * light; ell(x, y, m.r, m.r); ctx.fillStyle = '#ffe2b0'; ctx.fill();
+  }
+  ctx.globalAlpha = 1;
 }
 function draw() {
   drawBackground();
@@ -544,11 +636,15 @@ function draw() {
   const dark = clamp(.62 * (1 - light) * (1 - roomLight) - flash * .25, 0, .7);
   if (dark > 0) { ctx.fillStyle = `rgba(6,4,16,${dark})`; ctx.fillRect(0, 0, W, H); }
   sorted.forEach(drawFlame);
+  const vg = ctx.createRadialGradient(W / 2, H * .55, Math.min(W, H) * .35, W / 2, H * .55, Math.max(W, H) * .8);
+  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(4,2,12,.5)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
   // smoke
   for (const p of smoke) {
-    const k = p.age / p.life, r = p.r0 + k * G.cw * 1.6;
-    ell(p.x, p.y, r, r); ctx.fillStyle = `rgba(205,200,220,${.32 * (1 - k)})`; ctx.fill();
+    const k = p.age / p.life, r = p.r0 + Math.pow(k, .8) * G.cw * p.g * 1.7;
+    ctx.globalAlpha = Math.min(1, k / .08) * Math.pow(1 - k, 1.6) * .17;
+    ctx.drawImage(SMOKE, p.x - r, p.y - r, r * 2, r * 2);
   }
+  ctx.globalAlpha = 1;
   // fireworks
   ctx.globalCompositeOperation = 'lighter';
   for (const r of rockets) { ell(r.x, r.y, 2.4, 2.4); ctx.fillStyle = '#fff3c4'; ctx.fill(); ctx.fillStyle = 'rgba(255,200,120,.35)'; ctx.fillRect(r.x - 1, r.y, 2, 22); }
@@ -575,17 +671,17 @@ function frame(now) {
 
 /* ---------- controls ---------- */
 $('go').addEventListener('click', async () => {
-  try { await startMic(); $('note').innerHTML = '<span class="hint-key">Нет микрофона? Зажми пробел или </span>удерживай палец на торте'; }
+  try { await startMic(); $('note').innerHTML = '<span class="hint-key">No microphone? Hold Space, or </span>press and hold on the cake'; }
   catch (e) {
-    const why = (e && e.message === 'nomedia') ? 'Микрофон тут недоступен (нужен https или localhost).' : 'Доступ к микрофону не дали.';
-    $('note').textContent = why + ' Зажми пробел или удерживай палец на торте.';
+    const why = (e && e.message === 'nomedia') ? 'The microphone is not available here (it needs https or localhost).' : 'Microphone access was not granted.';
+    $('note').textContent = why + ' Hold Space, or press and hold on the cake.';
   }
   begin();
 });
-$('nomic').addEventListener('click', () => { ensureAudio(); $('note').textContent = 'Зажми пробел или удерживай палец на торте, чтобы дуть.'; begin(); });
+$('nomic').addEventListener('click', () => { ensureAudio(); $('note').textContent = 'Hold Space, or press and hold on the cake, to blow.'; begin(); });
 $('again').addEventListener('click', reset);
 $('mute').addEventListener('click', () => {
-  muted = !muted; if (master) master.gain.value = muted ? 0 : .8; $('mute').textContent = muted ? 'Звук: выкл' : 'Звук: вкл';
+  muted = !muted; if (master) master.gain.value = muted ? 0 : .8; $('mute').textContent = muted ? 'Sound: off' : 'Sound: on';
 });
 addEventListener('keydown', e => { if (e.code === 'Space' && state !== 'idle') { e.preventDefault(); holding = true; } });
 addEventListener('keyup', e => { if (e.code === 'Space') holding = false; });
